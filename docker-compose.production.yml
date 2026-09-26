@@ -1,0 +1,68 @@
+services:
+  api:
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_URL: postgresql+psycopg://findocs:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@postgres:5432/findocs
+    ports: []
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+
+  dashboard:
+    ports: []
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: findocs
+      POSTGRES_USER: findocs
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U findocs -d findocs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - findocs
+
+  caddy:
+    image: caddy:2.9-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    networks:
+      - findocs
+
+  postgres-backup:
+    image: postgres:16-alpine
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    volumes:
+      - backup_data:/backups
+    entrypoint: ["sh", "-c"]
+    command: ["while true; do pg_dump --host postgres --username findocs --dbname findocs --format=custom --file=/backups/findocs-$$(date +%Y%m%d%H%M).dump; find /backups -type f -mtime +7 -delete; sleep 86400; done"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - findocs
+
+volumes:
+  postgres_data:
+  backup_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,6 @@
+{$PUBLIC_HOST:?PUBLIC_HOST must be set} {
+    reverse_proxy /api/* api:8000
+    reverse_proxy /health api:8000
+    reverse_proxy /ready api:8000
+    reverse_proxy dashboard:8501
+}
