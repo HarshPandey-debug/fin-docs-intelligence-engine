@@ -1,0 +1,29 @@
+[
+  {
+    "id": "prepayment-penalty-disclosure",
+    "title": "Prepayment penalty requires explicit borrower disclosure",
+    "severity": "high",
+    "when_any": ["prepayment premium", "early repayment penalty", "prepayment fee"],
+    "require_any": ["percentage", "%", "make-whole", "premium"],
+    "pass_rationale": "The retrieved prepayment language includes a quantified or defined penalty mechanism.",
+    "fail_rationale": "Prepayment penalty language was found without a retrieved quantified or defined penalty mechanism."
+  },
+  {
+    "id": "financial-covenant-threshold",
+    "title": "Financial covenant requires a measurable threshold",
+    "severity": "high",
+    "when_any": ["financial covenant", "debt to ebitda", "leverage ratio", "interest coverage"],
+    "require_any": ["not exceed", "at least", "maximum", "minimum", "x"],
+    "pass_rationale": "The retrieved covenant language includes a measurable threshold indicator.",
+    "fail_rationale": "Financial covenant language was found without a retrieved measurable threshold indicator."
+  },
+  {
+    "id": "change-of-control-remedy",
+    "title": "Change-of-control clause requires a remedy",
+    "severity": "medium",
+    "when_any": ["change of control"],
+    "require_any": ["event of default", "repay", "prepay", "accelerate"],
+    "pass_rationale": "The retrieved change-of-control language includes a remedy indicator.",
+    "fail_rationale": "Change-of-control language was found without a retrieved remedy indicator."
+  }
+]
